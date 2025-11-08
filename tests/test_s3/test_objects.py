@@ -11,5 +11,4 @@ def test_object_content(s3_client, bucket):
     assert file_content == content
 
     head = s3_client.head_object(Bucket=bucket, Key=file)
-    print(head["Metadata"])
     assert head["Metadata"] == metadata
