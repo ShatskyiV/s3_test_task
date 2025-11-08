@@ -1,15 +1,14 @@
 import pytest
-import botocore
-from boto3 import client
+
 
 @pytest.mark.default
-def test_create_bucket(bucket: str, s3_client: client):
+def test_create_bucket(bucket: str, s3_client):
     existing_buckets = s3_client.list_buckets()["Buckets"]
     existing_buckets_names = [bucket["Name"] for bucket in existing_buckets]
     assert bucket in existing_buckets_names, f"Bucket {bucket} was not created."
 
 @pytest.mark.default
-def test_two_buckets_with_same_name(bucket: str, s3_client: client):
+def test_two_buckets_with_same_name(bucket: str, s3_client):
     region = "eu-central-1"
     try:
         s3_client.create_bucket(Bucket=bucket, CreateBucketConfiguration={"LocationConstraint": region})
@@ -24,7 +23,7 @@ def test_two_buckets_with_same_name(bucket: str, s3_client: client):
     ("us-east-1", "us-east-1")
     ],
     indirect=["s3_client"])
-def test_create_bucket_custom_region(bucket: str, s3_client: client, expected_region: str):
+def test_create_bucket_custom_region(bucket: str, s3_client, expected_region: str):
     existing_buckets = s3_client.list_buckets()["Buckets"]
     existing_buckets_names = [bucket["Name"] for bucket in existing_buckets]
     assert bucket in existing_buckets_names, f"Bucket {bucket} was not created."
