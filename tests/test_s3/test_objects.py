@@ -35,3 +35,19 @@ def test_objects_listing(s3_client, bucket):
     keys = [obj["Key"] for obj in listed["Contents"]]
     for key in uploaded:
         assert key in keys, f'File object "{key}" is not present in listed objects.'
+
+@pytest.mark.extra
+def test_download_by_presigned_url(s3_client, bucket):
+    import requests
+    key = "presigned_ulr.txt"
+    content = "Hello S3"
+    s3_client.put_object(Bucket=bucket, Body=content, Key=key)
+    url = s3_client.generate_presigned_url(
+        'get_object',
+        Params={'Bucket': bucket, 'Key': key},
+        ExpiresIn=60,
+    )
+    assert url is not None, "URL was not generated."
+    response = requests.get(url)
+    assert response.status_code == 200
+    assert response.content.decode() == content
