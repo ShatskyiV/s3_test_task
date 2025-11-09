@@ -5,17 +5,35 @@ import uuid
 from log import log
 
 
-def gen_bucket_name(prefix: str = 's3-test-task'):
+def gen_bucket_name(prefix: str = 's3-test-task')->str:
+    """
+    Generate unique bucket name with given prefix and random UUID4 suffix.
+    :param prefix: Bucket name prefix
+    :return: Unique bucket name
+    """
     return f"{prefix}--{uuid.uuid4().hex}"
 
 @pytest.fixture(scope='session')
-def s3_client(request):
+def s3_client(request: pytest.FixtureRequest):
+    """
+    Setup S3 client for the given region.
+    This is a session-scoped fixture that provides a boto3 S3 client once per test session.
+    The region can be specified via the 'request' parameter; if not provided, it defaults to 'us-east-1'.
+    :param request: Parameter to specify the AWS region for the S3 client
+    :return: Boto3 S3 client
+    """
     region = getattr(request, "param", "us-east-1")
     log.info(f'Setting up S3 client for region "{region}"')
     return boto3.client('s3', region_name=region)
 
 @pytest.fixture
 def bucket(s3_client):
+    """
+    This fixture creates a new S3 bucket before a test and deletes it after the test,
+    deleting all objects within it first.
+    It yields the name of the created bucket to the test.
+    :param s3_client: S3 client fixture
+    """
     bucket_name = gen_bucket_name()
     region = s3_client.meta.region_name
     log.info("Creating new bucket.")

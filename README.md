@@ -34,6 +34,13 @@ Make sure you have installed all dependencies with:
 pip install -r requirements.txt
 ```
 
+There are custom markers used in the tests. To run tests with specific markers, use:
+
+```
+- default: to run tests from initial tasks
+- extra: to run tests from extra tasks
+```
+
 ### 3. AWS Region
 
 Any AWS region can be used for this project.
