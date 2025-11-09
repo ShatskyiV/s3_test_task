@@ -23,7 +23,7 @@ def test_two_buckets_with_same_name(bucket: str, s3_client):
     region = "eu-central-1"
     with pytest.raises(s3_client.exceptions.BucketAlreadyOwnedByYou) as err:
         s3_client.create_bucket(Bucket=bucket, CreateBucketConfiguration={"LocationConstraint": region})
-    assert "BucketAlreadyOwnedByYou" == err.response["Error"]["Code"]
+    assert "BucketAlreadyOwnedByYou" == err.value.response["Error"]["Code"]
 
 @pytest.mark.extra
 @pytest.mark.parametrize(

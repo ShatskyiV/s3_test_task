@@ -29,7 +29,7 @@ def test_get_nonexistent_object(s3_client, bucket):
     file = "hello_s3.txt"
     with pytest.raises(s3_client.exceptions.NoSuchKey) as err:
         s3_client.get_object(Bucket=bucket, Key=file)
-    assert "NoSuchKey" == err.response["Error"]["Code"], f'Error "NoSuchKey" is not present in response.'
+    assert "NoSuchKey" == err.value.response["Error"]["Code"], f'Error "NoSuchKey" is not present in response.'
 
 @pytest.mark.default
 def test_objects_listing(s3_client, bucket):
