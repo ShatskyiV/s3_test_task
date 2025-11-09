@@ -9,6 +9,7 @@ def test_create_bucket(bucket: str, s3_client):
     :param s3_client: S3 client
     """
     existing_buckets = s3_client.list_buckets()["Buckets"]
+    assert existing_buckets["ResponseMetadata"]["HTTPStatusCode"] == 200, "Failed to list buckets."
     existing_buckets_names = [bucket["Name"] for bucket in existing_buckets]
     assert bucket in existing_buckets_names, f"Bucket {bucket} was not created."
 
@@ -24,6 +25,8 @@ def test_two_buckets_with_same_name(bucket: str, s3_client):
     with pytest.raises(s3_client.exceptions.BucketAlreadyOwnedByYou) as err:
         s3_client.create_bucket(Bucket=bucket, CreateBucketConfiguration={"LocationConstraint": region})
     assert "BucketAlreadyOwnedByYou" == err.value.response["Error"]["Code"]
+    assert err.value.response["ResponseMetadata"]["HTTPStatusCode"] == 404, \
+        f'HTTP status code is not 404. It is {err.value.response["ResponseMetadata"]["HTTPStatusCode"]}.'
 
 @pytest.mark.extra
 @pytest.mark.parametrize(
@@ -42,6 +45,7 @@ def test_create_bucket_custom_region(bucket: str, s3_client, expected_region: st
     :param expected_region: S3 region where the bucket is created
     """
     existing_buckets = s3_client.list_buckets()["Buckets"]
+    assert existing_buckets["ResponseMetadata"]["HTTPStatusCode"] == 200, "Failed to list buckets."
     existing_buckets_names = [bucket["Name"] for bucket in existing_buckets]
     assert bucket in existing_buckets_names, f"Bucket {bucket} was not created."
 
@@ -49,6 +53,7 @@ def test_create_bucket_custom_region(bucket: str, s3_client, expected_region: st
         f"Client region is not {expected_region}. It is {s3_client.meta.region_name}."
 
     bucket_location = s3_client.get_bucket_location(Bucket=bucket)["LocationConstraint"]
+    assert bucket_location["ResponseMetadata"]["HTTPStatusCode"] == 200, "Failed to get bucket location."
     if expected_region == "us-east-1" and bucket_location is None:
         bucket_location = "us-east-1"
     assert bucket_location==expected_region, f'Bucket location is not {expected_region}. It is {bucket_location}.'
