@@ -3,6 +3,11 @@ import pytest
 
 @pytest.mark.default
 def test_object_content(s3_client, bucket):
+    """
+    Tests uploading an object to S3, downloading it, and verifying if its content and metadata are same as expected.
+    :param s3_client: S3 client
+    :param bucket: Bucket name
+    """
     key = "hello_s3.txt"
     content = "Hello S3"
     metadata = {"author": "test-object-content", "purpose": "test-metadata"}
@@ -16,14 +21,23 @@ def test_object_content(s3_client, bucket):
 
 @pytest.mark.default
 def test_get_nonexistent_object(s3_client, bucket):
+    """
+    Tests attempting to download a non-existent object from S3 and expects a NoSuchKey error.
+    :param s3_client: S3 client
+    :param bucket: Bucket name
+    """
     file = "hello_s3.txt"
-    try:
+    with pytest.raises(s3_client.exceptions.NoSuchKey) as err:
         s3_client.get_object(Bucket=bucket, Key=file)
-    except s3_client.exceptions.NoSuchKey as err:
-        assert "NoSuchKey" == err.response["Error"]["Code"], f'Error "NoSuchKey" is not present in response.'
+    assert "NoSuchKey" == err.response["Error"]["Code"], f'Error "NoSuchKey" is not present in response.'
 
 @pytest.mark.default
 def test_objects_listing(s3_client, bucket):
+    """
+    Tests uploading multiple objects to S3 and listing them to verify their presence.
+    :param s3_client: S3 client
+    :param bucket: Bucket name
+    """
     prefix = "s3-listing-test"
     uploaded = list()
     for num in range(15):
@@ -38,6 +52,11 @@ def test_objects_listing(s3_client, bucket):
 
 @pytest.mark.extra
 def test_download_by_presigned_url(s3_client, bucket):
+    """
+    Tests generating a presigned URL for an S3 object, downloading it using that URL and verifying its content.
+    :param s3_client: S3 client
+    :param bucket: Bucket name
+    """
     import requests
     key = "presigned_ulr.txt"
     content = "Hello S3"

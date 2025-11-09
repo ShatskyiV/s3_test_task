@@ -3,17 +3,27 @@ import pytest
 
 @pytest.mark.default
 def test_create_bucket(bucket: str, s3_client):
+    """
+    Test creating a bucket and verify its existence.
+    :param bucket: created bucket name
+    :param s3_client: S3 client
+    """
     existing_buckets = s3_client.list_buckets()["Buckets"]
     existing_buckets_names = [bucket["Name"] for bucket in existing_buckets]
     assert bucket in existing_buckets_names, f"Bucket {bucket} was not created."
 
 @pytest.mark.default
 def test_two_buckets_with_same_name(bucket: str, s3_client):
+    """
+    Test creating a bucket with a name that already exists and is owned by you.
+    This should raise a BucketAlreadyOwnedByYou exception.
+    :param bucket: Name of the existing bucket
+    :param s3_client: S3 client
+    """
     region = "eu-central-1"
-    try:
+    with pytest.raises(s3_client.exceptions.BucketAlreadyOwnedByYou) as err:
         s3_client.create_bucket(Bucket=bucket, CreateBucketConfiguration={"LocationConstraint": region})
-    except s3_client.exceptions.BucketAlreadyOwnedByYou as err:
-       assert "BucketAlreadyOwnedByYou" == err.response["Error"]["Code"]
+    assert "BucketAlreadyOwnedByYou" == err.response["Error"]["Code"]
 
 @pytest.mark.extra
 @pytest.mark.parametrize(
@@ -24,6 +34,13 @@ def test_two_buckets_with_same_name(bucket: str, s3_client):
     ],
     indirect=["s3_client"])
 def test_create_bucket_custom_region(bucket: str, s3_client, expected_region: str):
+    """
+    Test creating a bucket in provided region and verify its location.
+    Test is parametrized to run for multiple regions.
+    :param bucket: Bucket name
+    :param s3_client: S3 client
+    :param expected_region: S3 region where the bucket is created
+    """
     existing_buckets = s3_client.list_buckets()["Buckets"]
     existing_buckets_names = [bucket["Name"] for bucket in existing_buckets]
     assert bucket in existing_buckets_names, f"Bucket {bucket} was not created."
