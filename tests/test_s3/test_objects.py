@@ -11,13 +11,16 @@ def test_object_content(s3_client, bucket):
     key = "hello_s3.txt"
     content = "Hello S3"
     metadata = {"author": "test-object-content", "purpose": "test-metadata"}
-    s3_client.put_object(Bucket=bucket, Body=content, Key=key, Metadata=metadata)
-    response = s3_client.get_object(Bucket=bucket, Key=key)
-    file_content = response["Body"].read().decode()
+    put_response = s3_client.put_object(Bucket=bucket, Body=content, Key=key, Metadata=metadata)
+    assert put_response["ResponseMetadata"]["HTTPStatusCode"] == 200, "Failed to upload object to S3."
+    get_response = s3_client.get_object(Bucket=bucket, Key=key)
+    assert get_response["ResponseMetadata"]["HTTPStatusCode"] == 200, "Failed to download object from S3."
+    file_content = get_response["Body"].read().decode()
     assert file_content == content
 
-    head = s3_client.head_object(Bucket=bucket, Key=key)
-    assert head["Metadata"] == metadata
+    head_response = s3_client.head_object(Bucket=bucket, Key=key)
+    assert head_response["ResponseMetadata"]["HTTPStatusCode"] == 200, "Failed to retrieve head object from S3."
+    assert head_response["Metadata"] == metadata
 
 @pytest.mark.default
 def test_get_nonexistent_object(s3_client, bucket):
